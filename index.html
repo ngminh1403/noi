@@ -2,264 +2,199 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kéo thả Robot – Có điểm</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Robot Y Tế</title>
 
 <style>
-:root{
-  --bg:#0b1220;
-  --panel:#111a2e;
-  --text:#e8eefc;
-  --muted:#a7b4d6;
-  --border:rgba(255,255,255,.15);
-}
 body{
-  margin:0;
-  font-family:system-ui;
-  background:var(--bg);
-  color:var(--text);
-}
-h1{margin:10px}
-
-.guide{
-  background:#1a2440;
-  padding:12px;
-  margin:10px;
-  border-radius:12px;
-  line-height:1.5;
+margin:0;
+font-family:Arial;
+background:#0b1220;
+color:white;
 }
 
-.score{
-  font-size:18px;
-  font-weight:900;
-  margin:10px;
-  color:#6ee7b7;
-}
+h2{margin:0}
 
 .wrap{
-  max-width:1200px;
-  margin:auto;
-  display:grid;
-  grid-template-columns:1fr minmax(420px,520px) 1fr;
-  gap:10px;
-  padding:10px;
+display:grid;
+grid-template-columns:1fr 1.2fr 1fr;
+gap:12px;
+padding:12px;
 }
 
 .col{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:12px;
+background:#111a2e;
+padding:10px;
+border-radius:12px;
+max-height:90vh;
+overflow:auto;
 }
-.col-head{
-  padding:10px;
-  font-weight:800;
-  border-bottom:1px solid var(--border);
-}
-.col-body{padding:10px;min-height:500px}
 
-/* Robot row */
-.robot-row{
-  background:rgba(255,255,255,.05);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:10px;
-  margin-bottom:10px;
-}
-.slots{
-  display:grid;
-  grid-template-columns:140px 1fr;
-  gap:10px;
-  margin-top:8px;
-}
-.dropzone{
-  border:2px dashed rgba(255,255,255,.3);
-  border-radius:10px;
-  min-height:70px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:12px;
-  color:var(--muted);
-}
-.dropzone.filled{
-  border-style:solid;
-  background:rgba(110,231,183,.15);
-  color:white;
-}
-.dropzone.highlight{outline:2px solid #7aa2ff}
-
-/* Cards */
 .card,.task{
-  border:1px solid var(--border);
-  border-radius:12px;
-  background:rgba(255,255,255,.07);
-  margin-bottom:10px;
-  cursor:grab;
+background:#1c2a4a;
+padding:8px;
+margin:8px 0;
+border-radius:10px;
+cursor:grab;
 }
+
 .card img{
-  width:100%;
-  height:120px;
-  object-fit:cover;
-  border-radius:12px 12px 0 0;
+width:100%;
+border-radius:10px;
 }
-.cap{padding:8px;font-weight:700}
-.task{padding:10px}
+
+.robot-box{
+background:#16213e;
+padding:12px;
+border-radius:12px;
+margin-bottom:12px;
+}
+
+.drop{
+border:2px dashed #555;
+padding:15px;
+border-radius:10px;
+margin-top:6px;
+min-height:50px;
+text-align:center;
+}
 
 button{
-  padding:10px;
-  margin:10px;
-  font-weight:900;
-  cursor:pointer;
+padding:10px 16px;
+border:none;
+border-radius:10px;
+margin:6px;
+cursor:pointer;
+font-weight:bold;
 }
+
+.check{background:#4CAF50;color:white}
+.reset{background:#f44336;color:white}
+.shuffle{background:#2196F3;color:white}
+
+.center{text-align:center}
 </style>
 </head>
 
 <body>
 
-<h1>🤖 Trò chơi Ghép Robot Y Tế</h1>
-
-<div class="guide">
-<b>📖 Hướng dẫn:</b><br>
-1️⃣ Kéo <b>ảnh robot</b> vào đúng tên robot ở giữa.<br>
-2️⃣ Kéo <b>nhiệm vụ</b> vào đúng robot.<br>
-3️⃣ Mỗi ô đúng được <b>10 điểm</b>.<br>
-4️⃣ Nhấn <b>Kiểm tra</b> để xem điểm.<br>
-👉 Kéo gần mép màn hình sẽ tự cuộn.
+<div class="center">
+<h2>🤖 GHÉP ROBOT Y TẾ</h2>
+<p>Kéo ẢNH + NHIỆM VỤ đúng robot. Mỗi robot đúng = 10 điểm.</p>
 </div>
-
-<div class="score">Điểm: <span id="score">0</span></div>
-<button onclick="checkScore()">✅ Kiểm tra điểm</button>
 
 <div class="wrap">
 
-<div class="col">
-<div class="col-head">Ảnh robot</div>
-<div class="col-body" id="leftBin"></div>
+<div class="col" id="images"></div>
+
+<div class="col" id="robots"></div>
+
+<div class="col" id="tasks"></div>
+
 </div>
 
-<div class="col">
-<div class="col-head">Tên robot</div>
-<div class="col-body" id="robotList"></div>
-</div>
-
-<div class="col">
-<div class="col-head">Nhiệm vụ</div>
-<div class="col-body" id="rightBin"></div>
-</div>
-
+<div class="center">
+<button class="shuffle" onclick="shuffle()">🔀 Xáo ảnh</button>
+<button class="reset" onclick="location.reload()">🔄 Reset</button>
+<button class="check" onclick="check()">✅ Kiểm tra</button>
 </div>
 
 <script>
-/* DATA */
-const ROBOTS=[
- {id:"r1",name:"Robot khử khuẩn",task:"Phun thuốc sát trùng",img:"https://uploads.onecompiler.io/44d6tguj7/44d6tewqh/robot-1.png"},
- {id:"r2",name:"Robot phẫu thuật",task:"Hỗ trợ mổ",img:"https://uploads.onecompiler.io/44d6tguj7/44d6tewqh/robot-2.png"},
- {id:"r3",name:"Robot y tá",task:"Mang thuốc",img:"https://uploads.onecompiler.io/44d6tguj7/44d6tewqh/robot-3.png"},
- {id:"r4",name:"Robot đo thân nhiệt",task:"Đo nhiệt độ",img:"https://uploads.onecompiler.io/44d6tguj7/44d6tewqh/robot-4.png"}
+const DATA=[
+{id:"khu_khuan",name:"Robot khử khuẩn",task:"Phun thuốc sát trùng"},
+{id:"phau_thuat",name:"Robot phẫu thuật",task:"Hỗ trợ bác sĩ mổ chính xác"},
+{id:"yta",name:"Robot y tá",task:"Mang thuốc, hồ sơ đến phòng"},
+{id:"nhiet",name:"Robot đo thân nhiệt",task:"Đo nhiệt độ từ xa"},
+{id:"huongdan",name:"Robot hướng dẫn thông minh",task:"Chỉ đường và cung cấp thông tin"},
+{id:"vantuyen",name:"Robot vận chuyển vật tư",task:"Đưa vật tư y tế"},
+{id:"goiten",name:"Robot gọi tên bệnh nhân",task:"Tự động gọi bệnh nhân"},
+{id:"tiem",name:"Robot hỗ trợ tiêm",task:"Chuẩn bị và đưa vaccine"},
+{id:"hanhlang",name:"Robot khử trùng hành lang",task:"Làm sạch hành lang"},
+{id:"cutro",name:"Robot cứu trợ từ xa",task:"Hỗ trợ bệnh nhân cách ly"},
 ];
 
-/* AUTO SCROLL */
-let scrollInt=null;
+// tạo ảnh
+DATA.forEach(d=>{
+let div=document.createElement("div");
+div.className="card";
+div.draggable=true;
+div.id="img_"+d.id;
+div.dataset.id=d.id;
+div.innerHTML=`<img src="https://via.placeholder.com/200x130?text=${d.name}"><b>${d.name}</b>`;
+div.ondragstart=e=>e.dataTransfer.setData("id",div.id);
+images.appendChild(div);
+});
+
+// tạo nhiệm vụ
+DATA.forEach(d=>{
+let div=document.createElement("div");
+div.className="task";
+div.draggable=true;
+div.id="task_"+d.id;
+div.dataset.id=d.id;
+div.innerText=d.task;
+div.ondragstart=e=>e.dataTransfer.setData("id",div.id);
+tasks.appendChild(div);
+});
+
+// tạo robot box
+DATA.forEach(d=>{
+let box=document.createElement("div");
+box.className="robot-box";
+box.innerHTML=`
+<b>${d.name}</b>
+<div class="drop" data-type="img" data-id="${d.id}">Thả ẢNH</div>
+<div class="drop" data-type="task" data-id="${d.id}">Thả NHIỆM VỤ</div>
+`;
+robots.appendChild(box);
+});
+
+// drag drop
 document.addEventListener("dragover",e=>{
-  const edge=80;
-  if(e.clientY<edge) startScroll(-15);
-  else if(window.innerHeight-e.clientY<edge) startScroll(15);
-  else stopScroll();
+if(e.target.classList.contains("drop")){
+e.preventDefault();
+e.target.scrollIntoView({behavior:"smooth",block:"center"});
+}
 });
-function startScroll(v){
- if(scrollInt) return;
- scrollInt=setInterval(()=>window.scrollBy(0,v),20);
-}
-function stopScroll(){
- clearInterval(scrollInt);
- scrollInt=null;
-}
 
-/* CREATE */
-const leftBin=document.getElementById("leftBin");
-const rightBin=document.getElementById("rightBin");
-const robotList=document.getElementById("robotList");
+document.addEventListener("drop",e=>{
+if(!e.target.classList.contains("drop"))return;
+let id=e.dataTransfer.getData("id");
+let el=document.getElementById(id);
 
-function imgCard(r){
- const d=document.createElement("div");
- d.className="card";
- d.draggable=true;
- d.dataset.robot=r.id;
- d.dataset.kind="img";
- d.innerHTML=`<img src="${r.img}"><div class="cap">${r.name}</div>`;
- drag(d);
- return d;
-}
-function taskCard(r){
- const d=document.createElement("div");
- d.className="task";
- d.draggable=true;
- d.dataset.robot=r.id;
- d.dataset.kind="task";
- d.textContent=r.task;
- drag(d);
- return d;
-}
-function robotRow(r){
- const row=document.createElement("div");
- row.className="robot-row";
- row.innerHTML=`
- <b>${r.name}</b>
- <div class="slots">
-   <div class="dropzone" data-kind="img" data-robot="${r.id}">Thả ảnh</div>
-   <div class="dropzone" data-kind="task" data-robot="${r.id}">Thả nhiệm vụ</div>
- </div>`;
- row.querySelectorAll(".dropzone").forEach(drop);
- return row;
-}
+if(e.target.dataset.type==="img" && !id.startsWith("img"))return;
+if(e.target.dataset.type==="task" && !id.startsWith("task"))return;
 
-/* DRAG */
-let dragged=null;
-function drag(el){
- el.addEventListener("dragstart",()=>dragged=el);
- el.addEventListener("dragend",()=>{dragged=null;stopScroll();});
-}
-
-/* DROP */
-function drop(zone){
- zone.addEventListener("dragover",e=>{
-  e.preventDefault();
-  zone.classList.add("highlight");
-  zone.scrollIntoView({behavior:"smooth",block:"center"});
- });
- zone.addEventListener("dragleave",()=>zone.classList.remove("highlight"));
- zone.addEventListener("drop",()=>{
-  zone.classList.remove("highlight");
-  if(!dragged) return;
-  if(dragged.dataset.kind!==zone.dataset.kind) return;
-  zone.innerHTML="";
-  zone.appendChild(dragged);
-  zone.classList.add("filled");
- });
-}
-
-/* SCORE */
-function checkScore(){
- let score=0;
- document.querySelectorAll(".dropzone").forEach(z=>{
-  const item=z.firstElementChild;
-  if(!item) return;
-  if(item.dataset.robot===z.dataset.robot){
-    score+=10;
-    z.style.borderColor="#6ee7b7";
-  }else{
-    z.style.borderColor="red";
-  }
- });
- document.getElementById("score").textContent=score;
-}
-
-/* INIT */
-ROBOTS.forEach(r=>{
- leftBin.appendChild(imgCard(r));
- rightBin.appendChild(taskCard(r));
- robotList.appendChild(robotRow(r));
+e.target.innerHTML="";
+e.target.appendChild(el);
 });
+
+// check
+function check(){
+let correct=0;
+
+document.querySelectorAll(".robot-box").forEach(b=>{
+let img=b.querySelector('[data-type="img"] .card');
+let task=b.querySelector('[data-type="task"] .task');
+
+if(img && task){
+let id=b.querySelector(".drop").dataset.id;
+if(img.dataset.id===id && task.dataset.id===id){
+correct++;
+}
+}
+});
+
+let total=DATA.length;
+alert(`Đúng ${correct}/${total}\nĐiểm: ${correct*10}`);
+}
+
+// shuffle
+function shuffle(){
+let arr=[...images.children];
+arr.sort(()=>Math.random()-0.5);
+arr.forEach(c=>images.appendChild(c));
+}
 </script>
 
 </body>
